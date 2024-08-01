@@ -13,7 +13,7 @@ require 'function/check_session.php';
     <meta name="author" content="">
 
     <title>PCBBOT - Admin</title>
-    <link rel="icon" type="image/x-icon" href="../img/prmsu_cande.png">
+    <link rel="icon" type="image/x-icon" href="../img/pcb.png">
 
     <!-- Custom fonts for this template-->
     <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">

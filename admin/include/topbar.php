@@ -25,14 +25,16 @@
                                     ?>
                                 </span>
                                 <?php
-                                    if (isset($_SESSION['profile']) && $_SESSION['profile']!="") {
-                                        $profile_pic = $_SESSION['profile'];
+                                    if (isset($_SESSION['fullname'])) {
+                                        $name = $_SESSION['fullname'];
                                     }else{
-                                        $profile_pic = "prmsu_cande.png";
+                                        $name = "Guest User";
                                     }
+                                   
+                                   $initials = strtoupper(substr($name, 0, 1));
+                                   $avatarUrl = "https://ui-avatars.com/api/?name=" . urlencode($name) . "&size=48&rounded=true&background=random&color=fff";
                                 ?>
-                                <img class="img-profile rounded-circle"
-                                    src="../img/profiles/<?php echo $profile_pic; ?>">
+                                <img class="img-profile rounded-circle" src="<?php echo $avatarUrl; ?>">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
