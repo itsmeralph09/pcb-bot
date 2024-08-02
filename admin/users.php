@@ -76,7 +76,7 @@
                                                         $username = $row['username'];
                                                         $email = $row['email'];
                                                         $first_name = $row['first_name'];
-                                                        $mid_name = $row['middle_name'];
+                                                        $middle_name = $row['middle_name'];
                                                         $last_name = $row['last_name'];
 
                                                         $suffix_name = $row['suffix_name'];
@@ -88,8 +88,10 @@
 
                                                         $designation = $row['designation'];
                                                         $role = $row['role'];
+                                                        $password = $row['password'];
 
                                                         $full_name = $row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name'] . ' ' . $suffix;
+
                                                 ?>
                                                 <tr>         
                                                     <td class=""><?php echo $counter; ?></td>
@@ -99,7 +101,7 @@
                                                     <td class=""><?php echo $designation; ?></td>
                                                     <td class=""><?php echo $role; ?></td>       
                                                     <td class="text-center">
-                                                        <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#view_<?php echo $user_id; ?>"><i class="fa-solid fa-pen-to-square"></i></a>
+                                                        <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#edit_<?php echo $user_id; ?>"><i class="fa-solid fa-pen-to-square"></i></a>
                                                         <a href="#" class="btn btn-sm btn-danger delete-user-btn"
                                                            data-user-id="<?php echo $user_id; ?>" 
                                                            data-user-name="<?php echo htmlspecialchars($full_name); ?>"
@@ -112,7 +114,7 @@
                                                 </tr>
                                                 <?php
                                                     $counter++;
-                                                    // include('modal/user_edit_modal.php');
+                                                    include('modal/user_edit_modal.php');
                                                 } 
                                                 ?>
                                             </tbody>
@@ -358,6 +360,128 @@
                         });
                      }).catch(() => {
                         // If user exists, do nothing (error message already shown)
+                    });
+                }
+            });
+        });
+    </script>
+    <!-- Update User Account -->
+    <script>
+        $(document).ready(function() {
+            // Function to show SweetAlert2 messages
+            const showSweetAlert = (icon, title, message) => {
+                Swal.fire({
+                    icon: icon,
+                    title: title,
+                    text: message
+                });
+            };
+
+            // Delegate click event handling to a parent element
+            $(document).on('click', '[id^="updateUser_"]', function(e) {
+                e.preventDefault(); // Prevent default form submission
+                var userID = $(this).attr('id').split('_')[1]; // Extract event ID
+                var formData = $('#updateForm_' + userID); // Get the form data
+                var modalDiv = $('#edit_' + userID);
+
+                let fieldsAreValid = true; // Initialize as true
+                // const requiredFields = formData.find('[required]'); // Select required fields
+                const requiredFields = modalDiv.find(':input[required]'); // Select required fields
+
+                // Remove existing error classes
+                $('.form-control').removeClass('input-error');
+
+                requiredFields.each(function() {
+                    // Check if the element is a select and it doesn't have a selected value
+                    if ($(this).is('select') && $(this).val() === null) {
+                        fieldsAreValid = false; // Set to false if any required select field doesn't have a value
+                        showSweetAlert('warning', 'Oops!', 'Please fill-up the required fields.');
+                        $(this).addClass('is-invalid'); // Add red border to missing field
+                    }
+                    // Check if the element is empty
+                    else if ($(this).val().trim() === '') {
+                        fieldsAreValid = false; // Set to false if any required field is empty or null
+                        showSweetAlert('warning', 'Oops!', 'Please fill-up the required fields.');
+                        $(this).addClass('is-invalid'); // Add red border to missing field
+                    } else {
+                        $(this).removeClass('is-invalid'); // Remove red border if field is filled
+                    }
+                });
+
+                let passwordsAreValid = true; // Initialize as true
+                const password = modalDiv.find('input[name="password"]').val();
+                const confirmPassword = modalDiv.find('input[name="confirm_password"]').val();
+
+                if (fieldsAreValid && password !== '') {
+                    if (password !== confirmPassword) {
+                        passwordsAreValid = false;
+                        showSweetAlert('warning','Oops!',"Passwords don't match. Please check and try again.");
+                        modalDiv.find('input[name="confirm_password"]').addClass('is-invalid'); // Add red border to confirm password field
+                    } else {
+                        modalDiv.find('input[name="confirm_password"]').removeClass('is-invalid'); // Remove red border if passwords match
+                    }
+                }
+                
+                if (fieldsAreValid && passwordsAreValid) {
+                    // Perform check for crop name existence
+                    $.ajax({
+                        url: 'action/check_user_existence.php', // URL to check if UID and email exist
+                        type: 'POST',
+                        data: formData.serialize(), // Form data to be checked
+                        dataType: 'json', // Specify JSON data type for response
+                        success: function(response) {
+                            // Remove existing error classes
+                            $('.form-control').removeClass('input-error');
+
+                            if (response.exists.username && response.exists.email) {
+                                showSweetAlert('error', 'Oops!', 'Username and Email already exists.');
+                                modalDiv.find('input[name="username"]').addClass('input-error');
+                                modalDiv.find('input[name="email"]').addClass('input-error');
+                            }else if (response.exists.username) {
+                                showSweetAlert('error', 'Oops!', 'Username already exists.');
+                                modalDiv.find('input[name="username"]').addClass('input-error');
+                            } else if (response.exists.email) {
+                                showSweetAlert('error', 'Oops!', 'Email already exists.');
+                                modalDiv.find('input[name="email"]').addClass('input-error');
+                            } else {
+                                // If Garden Code and Garden Name do not exist, proceed with updating
+                                $.ajax({
+                                    url: 'action/update_user.php', // URL to submit the form data
+                                    type: 'POST',
+                                    data: formData.serialize(), // Form data to be submitted
+                                    dataType: 'json',
+                                    success: function(response) {
+                                        // Handle the success response
+                                        console.log(response); // Output response to console (for debugging)
+                                        if (response.status === 'success') {
+                                            Swal.fire(
+                                                'Success!',
+                                                response.message,
+                                                'success'
+                                            ).then(() => {
+                                                location.reload();
+                                            });
+                                        } else {
+                                            Swal.fire(
+                                                'Error!',
+                                                response.message,
+                                                'error'
+                                            );
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        // Handle the error response
+                                        console.error(xhr.responseText); // Output error response to console (for debugging)
+                                        showSweetAlert('error', 'Error', 'Failed to update user. Please try again later.');
+                                    }
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle the error response for existence check
+                            console.error(xhr.responseText); // Output error response to console (for debugging)
+                            showSweetAlert('error', 'Error', 'Failed to check Username and Email existence. Please try again later.');
+                        }
                     });
                 }
             });
