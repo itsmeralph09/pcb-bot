@@ -54,6 +54,7 @@
                                                     <th scope="col">#</th>                                        
                                                     <th scope="col">Name</th>                                               
                                                     <th scope="col">Username</th>                                               
+                                                    <th scope="col">Email</th>                                               
                                                     <th scope="col">Designation</th>                                             
                                                     <th scope="col">Role</th>                                           
                                                     <th scope="col">Action</th>                             
@@ -73,6 +74,7 @@
                                                     while($row = mysqli_fetch_array($sqlQuery)){
                                                         $user_id = $row['user_id'];
                                                         $username = $row['username'];
+                                                        $email = $row['email'];
                                                         $first_name = $row['first_name'];
                                                         $mid_name = $row['middle_name'];
                                                         $last_name = $row['last_name'];
@@ -93,22 +95,24 @@
                                                     <td class=""><?php echo $counter; ?></td>
                                                     <td class=""><?php echo $full_name; ?></td>
                                                     <td class=""><?php echo $username; ?></td>
+                                                    <td class=""><?php echo $email; ?></td>
                                                     <td class=""><?php echo $designation; ?></td>
                                                     <td class=""><?php echo $role; ?></td>       
                                                     <td class="text-center">
-                                                        <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#view_<?php echo $user_id; ?>"><i class="fa-solid fa-eye"></i></a>
-                                                        <!-- <a href="#" class="btn btn-sm btn-danger delete-student-btn"
+                                                        <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#view_<?php echo $user_id; ?>"><i class="fa-solid fa-pen-to-square"></i></a>
+                                                        <a href="#" class="btn btn-sm btn-danger delete-user-btn"
                                                            data-user-id="<?php echo $user_id; ?>" 
                                                            data-user-name="<?php echo htmlspecialchars($full_name); ?>"
-                                                           data-user-no="<?php echo htmlspecialchars($student_no); ?>"
-                                                           data-user-course="<?php echo htmlspecialchars($course); ?>">
+                                                           data-user-username="<?php echo htmlspecialchars($username); ?>"
+                                                           data-user-email="<?php echo htmlspecialchars($email); ?>"
+                                                           data-user-designation="<?php echo htmlspecialchars($designation); ?>">
                                                            <i class="fa-solid fa-trash"></i>
-                                                        </a> -->
+                                                        </a>
                                                     </td>
                                                 </tr>
                                                 <?php
                                                     $counter++;
-                                                    // include('modal/student_view_edit_modal.php');
+                                                    // include('modal/user_edit_modal.php');
                                                 } 
                                                 ?>
                                             </tbody>
@@ -159,19 +163,21 @@
     <script>
         $(document).ready(function() {
             // Function for deleting event
-            $('.delete-student-btn').on('click', function(e) {
+            $('.delete-user-btn').on('click', function(e) {
                 e.preventDefault();
-                var declineButton = $(this);
-                var userId = declineButton.data('user-id');
-                var userName = decodeURIComponent(declineButton.data('user-name'));
-                var userNo = decodeURIComponent(declineButton.data('user-no'));
-                var userCourse = decodeURIComponent(declineButton.data('user-course'));
+                var deleteButton = $(this);
+                var userId = deleteButton.data('user-id');
+                var userName = decodeURIComponent(deleteButton.data('user-name'));
+                var userUsername = decodeURIComponent(deleteButton.data('user-username'));
+                var userEmail = decodeURIComponent(deleteButton.data('user-email'));
+                var userDesignation = decodeURIComponent(deleteButton.data('user-designation'));
                 Swal.fire({
-                    title: 'Delete Student Account',
-                    html: "You are about to delete the following student:<br><br>" +
+                    title: 'Delete User Account',
+                    html: "You are about to delete the following user:<br><br>" +
                           "<strong>Name:</strong> " + userName + "<br>" +
-                          "<strong>Student No.:</strong> " + userNo + "<br>" +
-                          "<strong>Course:</strong> " + userCourse + "<br>",
+                          "<strong>Username:</strong> " + userUsername + "<br>" +
+                          "<strong>Email:</strong> " + userEmail + "<br>" +
+                          "<strong>Designation:</strong> " + userDesignation + "<br>",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
@@ -180,7 +186,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: 'action/delete_student.php', // Corrected 'file' to 'url'
+                            url: 'action/delete_user.php',
                             type: 'POST',
                             data: {
                                 user_id: userId
@@ -189,7 +195,7 @@
                                 if (response.trim() === 'success') {
                                     Swal.fire(
                                         'Deleted!',
-                                        'Student has been deleted.',
+                                        'User has been deleted.',
                                         'success'
                                     ).then(() => {
                                         location.reload();
@@ -197,7 +203,7 @@
                                 } else {
                                     Swal.fire(
                                         'Error!',
-                                        'Failed to delete student.',
+                                        'Failed to delete user.',
                                         'error'
                                     );
                                 }
@@ -206,7 +212,7 @@
                                 console.error(xhr.responseText);
                                 Swal.fire(
                                     'Error!',
-                                    'Failed to delete student.',
+                                    'Failed to delete user.',
                                     'error'
                                 );
                             }
