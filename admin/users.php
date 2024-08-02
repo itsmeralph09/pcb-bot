@@ -122,6 +122,7 @@
                                 </div>
                             </div>
                         </div>
+                        <?php include('modal/user_add_modal.php'); ?>
                     </div>
                     
                 </div>
@@ -159,7 +160,7 @@
         });
     </script>
 
-    <!-- Decline Students Account Registration -->
+    <!-- Delete User Account -->
     <script>
         $(document).ready(function() {
             // Function for deleting event
@@ -219,6 +220,146 @@
                         });
                     }
                 });
+            });
+        });
+    </script>
+    <!-- Add User Account-->
+    <script>
+        $(document).ready(function() {
+            // Function to show SweetAlert2 warning message
+            const showWarningMessage = (message) => {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: message
+                });
+            };
+
+            // Function to check if username or email already exists
+            const checkExistingUser = (formData) => {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: 'action/check_user_exists.php', // URL to check the database
+                        type: 'POST',
+                        data: formData.serialize(), // Serialize form data
+                        success: function(response) {
+                            if (response.exists) {
+                                // Highlight the corresponding input fields with red border
+                                if (response.exists.username && response.exists.email) {
+                                    showWarningMessage('Username and Email already exists.');
+                                    formData.find('input[name="username"]').addClass('input-error');
+                                    formData.find('input[name="email"]').addClass('input-error');
+                                } else if (response.exists.username) {
+                                    showWarningMessage('Username already exists.');
+                                    formData.find('input[name="username"]').addClass('input-error');
+                                } else if (response.exists.email) {
+                                    showWarningMessage('Email already exists.');
+                                    formData.find('input[name="email"]').addClass('input-error');
+                                }
+                                reject(); // Reject the promise if department already exists
+                            } else {
+                                resolve(); // Resolve the promise if department doesn't exist
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText); // Output error response to console (for debugging)
+                            reject(); // Reject the promise if there's an error
+                        }
+                    });
+                });
+            };
+
+            $('#addUser').on('click', function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                var formData = $('#addNew form'); // Select the form element
+
+                const requiredFields = formData.find('[required], select');
+                let fieldsAreValid = true; // Initialize as false
+
+                // Remove existing error classes
+                $('.form-control').removeClass('input-error');
+
+                requiredFields.each(function() {
+                    // Check if the element is a select and it doesn't have a selected value
+                    if ($(this).is('select') && $(this).val() === null) {
+                        fieldsAreValid = false; // Set to false if any required select field doesn't have a value
+                        showWarningMessage('Please fill-up the required fields.');
+                        $(this).addClass('is-invalid'); // Add red border to missing field
+                    }
+                    // Check if the element is empty
+                    else if ($(this).val().trim() === '') {
+                        fieldsAreValid = false; // Set to false if any required field is empty
+                        showWarningMessage('Please fill-up the required fields.');
+                        $(this).addClass('is-invalid'); // Add red border to missing field
+                    } else {
+                        $(this).removeClass('is-invalid'); // Remove red border if field is filled
+                    }
+                });
+
+                let passwordsAreValid = true; // Initialize as true
+                const password = formData.find('input[name="password"]').val();
+                const confirmPassword = formData.find('input[name="confirm_password"]').val();
+
+                if (fieldsAreValid) {
+                    if (password !== confirmPassword) {
+                        passwordsAreValid = false;
+                        showWarningMessage("Passwords don't match. Please check and try again.");
+                        formData.find('input[name="confirm_password"]').addClass('is-invalid'); // Add red border to confirm password field
+                    } else {
+                        formData.find('input[name="confirm_password"]').removeClass('is-invalid'); // Remove red border if passwords match
+                    }
+                }
+
+                if (fieldsAreValid && passwordsAreValid) {
+                    checkExistingUser(formData).then(() => {
+                        // If username or email doesn't exist, proceed with form submission
+                        $.ajax({
+                            url: 'action/add_user.php', // URL to submit the form data
+                            type: 'POST',
+                            data: formData.serialize(), // Serialize form data
+                            success: function(response) {
+                                // Handle the success response
+                                console.log(response); // Output response to console (for debugging)
+                                if (response === 'success') {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'User added successfully!',
+                                        showConfirmButton: true, // Show OK button
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Failed to add user!',
+                                        text: 'Please try again later.',
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                // Handle the error response
+                                console.error(xhr.responseText); // Output error response to console (for debugging)
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Failed to add user',
+                                    text: 'Please try again later.',
+                                    showConfirmButton: true, // Show OK button
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            }
+                        });
+                     }).catch(() => {
+                        // If user exists, do nothing (error message already shown)
+                    });
+                }
             });
         });
     </script>

@@ -43,10 +43,11 @@ require 'function/check_session.php';
         .custom-readonly-input {
             font-style: italic;
             border: none;
-            border-bottom: 1.2px dashed #303991;
+            border-bottom: 1.2px solid #303991;
+/*            border: 1.2px solid #303991;*/
             border-radius: 0;
-            background-color: transparent;
-            padding-left: 0;
+            background-color: rgba(48, 57, 145, 0.06);
+/*            padding-left: 0;*/
         }
 
         .custom-readonly-input:focus {
@@ -55,10 +56,14 @@ require 'function/check_session.php';
             outline: none;
             box-shadow: none;
             border: none;
-            border-bottom: 1.2px solid #303991;
+            border-bottom: 1.2px dashed #303991;
             border-radius: 0;
             background-color: transparent;
-            padding-left: 0;
+/*            padding-left: 0;*/
+        }
+        body.swal2-shown > [aria-hidden='true'] {
+          transition: 0.1s filter;
+          filter: blur(3px);
         }
     </style>
 
