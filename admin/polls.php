@@ -196,7 +196,7 @@
                             url: 'action/delete_poll.php',
                             type: 'POST',
                             data: {
-                                user_id: pollID
+                                poll_id: pollID
                             },
                             success: function(response) {
                                 if (response.trim() === 'success') {
