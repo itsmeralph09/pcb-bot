@@ -104,7 +104,7 @@
                                                         }
 
                                                         // Fetch poll options
-                                                        $poll_options_query = "SELECT * FROM `poll_options_tbl` WHERE poll_id = $poll_id";
+                                                        $poll_options_query = "SELECT * FROM `poll_options_tbl` WHERE poll_id = $poll_id AND deleted = 0";
                                                         $options_result = mysqli_query($con, $poll_options_query) or die(mysqli_error($con));
                                                         $options = [];
                                                         while ($option_row = mysqli_fetch_array($options_result)) {
@@ -134,7 +134,7 @@
                                                 </tr>
                                                 <?php
                                                     $counter++;
-                                                    // include('modal/user_edit_modal.php');
+                                                    include('modal/poll_edit_modal.php');
                                                 } 
                                                 ?>
                                             </tbody>
@@ -204,6 +204,47 @@
             // Function to remove poll option input field
             $(document).on('click', '.remove-option-button', function() {
                 $(this).closest('.poll-option-group').remove();
+            });
+        });
+    </script>
+
+    <!-- Edit Poll Modal Script -->
+    <script>
+        $(document).ready(function() {
+            // Function to add new poll option input field with a remove button
+            $(document).on('click', '[id^=add-option-button_]', function() {
+                const poll_id = $(this).attr('id').split('_')[1];
+                const newIndex = $('#poll-options-container_' + poll_id + ' .poll-option-input').length;
+                const newOption = `
+                    <div class="col-12 form-group mb-3 px-0 poll-option-group">
+                        <div class="col-12 d-flex">
+                            <label class="control-label modal-label my-auto" for="poll_options_${poll_id}_${newIndex}">Poll Option ${newIndex + 1}</label>
+                        </div>
+                        <div class="col-12 d-flex">
+                            <input class="form-control poll-option-input custom-readonly-input" id="poll_options_${poll_id}_${newIndex}" name="poll_options[]" type="text" required>
+                            <button type="button" class="btn btn-danger ml-2" id="remove-option-button_${poll_id}">Remove</button>
+                        </div>
+                    </div>`;
+                $('#poll-options-container_' + poll_id).append(newOption);
+            });
+
+            // Function to remove poll option input field
+            $(document).on('click', '[id^=remove-option-button_]', function() {
+                // const poll_id = $(this).closest('.modal').find('[id^=poc_]').attr('id').split('_')[1];
+                const poll_id = $(this).attr('id').split('_')[1];
+                console.log(poll_id);
+                const remainingOptions = $('#poll-options-container_' + poll_id + ' .poll-option-group').length;
+
+                // Prevent removal if only two options are left
+                if (remainingOptions <= 2) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cannot Remove Option',
+                        text: 'At least two poll options are required.'
+                    });
+                } else {
+                    $(this).closest('.poll-option-group').remove();
+                }
             });
         });
     </script>
@@ -337,7 +378,7 @@
         });
     </script>
 
-    <!-- Add Poll Account-->
+    <!-- Add Poll-->
     <script>
         $(document).ready(function() {
             // Function to show SweetAlert2 warning message
@@ -426,8 +467,8 @@
             });
         });
     </script>
-    
-    <!-- Update User Account -->
+
+    <!-- Update Poll -->
     <script>
         $(document).ready(function() {
             // Function to show SweetAlert2 messages
@@ -440,11 +481,12 @@
             };
 
             // Delegate click event handling to a parent element
-            $(document).on('click', '[id^="updateUser_"]', function(e) {
+            $(document).on('click', '[id^="updatePoll_"]', function(e) {
                 e.preventDefault(); // Prevent default form submission
-                var userID = $(this).attr('id').split('_')[1]; // Extract event ID
-                var formData = $('#updateForm_' + userID); // Get the form data
-                var modalDiv = $('#edit_' + userID);
+                var pollID = $(this).attr('id').split('_')[1]; // Extract event ID
+                // var formData = $('#updateForm_' + pollID); // Get the form data
+                var formData = $('#updateForm_' + pollID).serialize(); // Get the form data
+                var modalDiv = $('#edit_' + pollID);
 
                 let fieldsAreValid = true; // Initialize as true
                 // const requiredFields = formData.find('[required]'); // Select required fields
@@ -469,82 +511,38 @@
                         $(this).removeClass('is-invalid'); // Remove red border if field is filled
                     }
                 });
-
-                let passwordsAreValid = true; // Initialize as true
-                const password = modalDiv.find('input[name="password"]').val();
-                const confirmPassword = modalDiv.find('input[name="confirm_password"]').val();
-
-                if (fieldsAreValid && password !== '') {
-                    if (password !== confirmPassword) {
-                        passwordsAreValid = false;
-                        showSweetAlert('warning','Oops!',"Passwords don't match. Please check and try again.");
-                        modalDiv.find('input[name="confirm_password"]').addClass('is-invalid'); // Add red border to confirm password field
-                    } else {
-                        modalDiv.find('input[name="confirm_password"]').removeClass('is-invalid'); // Remove red border if passwords match
-                    }
-                }
                 
-                if (fieldsAreValid && passwordsAreValid) {
-                    // Perform check for crop name existence
+                if (fieldsAreValid) {
                     $.ajax({
-                        url: 'action/check_user_existence.php', // URL to check if UID and email exist
+                        url: 'action/update_poll.php', // URL to submit the form data
                         type: 'POST',
-                        data: formData.serialize(), // Form data to be checked
-                        dataType: 'json', // Specify JSON data type for response
+                        data: formData, // Form data to be submitted
+                        dataType: 'json',
                         success: function(response) {
-                            // Remove existing error classes
-                            $('.form-control').removeClass('input-error');
-
-                            if (response.exists.username && response.exists.email) {
-                                showSweetAlert('error', 'Oops!', 'Username and Email already exists.');
-                                modalDiv.find('input[name="username"]').addClass('input-error');
-                                modalDiv.find('input[name="email"]').addClass('input-error');
-                            }else if (response.exists.username) {
-                                showSweetAlert('error', 'Oops!', 'Username already exists.');
-                                modalDiv.find('input[name="username"]').addClass('input-error');
-                            } else if (response.exists.email) {
-                                showSweetAlert('error', 'Oops!', 'Email already exists.');
-                                modalDiv.find('input[name="email"]').addClass('input-error');
-                            } else {
-                                // If Garden Code and Garden Name do not exist, proceed with updating
-                                $.ajax({
-                                    url: 'action/update_user.php', // URL to submit the form data
-                                    type: 'POST',
-                                    data: formData.serialize(), // Form data to be submitted
-                                    dataType: 'json',
-                                    success: function(response) {
-                                        // Handle the success response
-                                        console.log(response); // Output response to console (for debugging)
-                                        if (response.status === 'success') {
-                                            Swal.fire(
-                                                'Success!',
-                                                response.message,
-                                                'success'
-                                            ).then(() => {
-                                                location.reload();
-                                            });
-                                        } else {
-                                            Swal.fire(
-                                                'Error!',
-                                                response.message,
-                                                'error'
-                                            );
-                                        }
-                                    },
-                                    error: function(xhr, status, error) {
-                                        // Handle the error response
-                                        console.error(xhr.responseText); // Output error response to console (for debugging)
-                                        showSweetAlert('error', 'Error', 'Failed to update user. Please try again later.');
-                                    }
+                            // Handle the success response
+                            console.log(response); // Output response to console (for debugging)
+                            if (response.status === 'success') {
+                                Swal.fire(
+                                    'Success!',
+                                    response.message,
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
                                 });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    response.message,
+                                    'error'
+                                );
                             }
                         },
                         error: function(xhr, status, error) {
-                            // Handle the error response for existence check
+                            // Handle the error response
                             console.error(xhr.responseText); // Output error response to console (for debugging)
-                            showSweetAlert('error', 'Error', 'Failed to check Username and Email existence. Please try again later.');
+                            showSweetAlert('error', 'Error', 'Failed to update poll. Please try again later.');
                         }
-                    });
+                    });   
                 }
             });
         });
