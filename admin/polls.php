@@ -54,7 +54,7 @@
                                                     <th scope="col">#</th>                                        
                                                     <th scope="col">Title</th>                                               
                                                     <th scope="col">Description</th>                                  
-                                                    <th scope="col">Participants</th>                                       
+                                                    <th scope="col">Options</th>                                  
                                                     <th scope="col">Status</th>                                              
                                                     <th scope="col">Action</th>                            
                                                    
@@ -82,6 +82,7 @@
                                                             $status_text = "<span class='text-success'>OPEN</span>";
                                                         }
 
+
                                                         if ($poll_status == "CLOSE") {
                                                             $status_button = "<a class='btn btn-sm btn-success open-poll-btn shadow-sm'
                                                                                 data-toggle='tooltip' data-placement='right' title='Open " . htmlspecialchars($poll_title) . "'
@@ -102,12 +103,21 @@
                                                                               </a>";
                                                         }
 
+                                                        // Fetch poll options
+                                                        $poll_options_query = "SELECT * FROM `poll_options_tbl` WHERE poll_id = $poll_id";
+                                                        $options_result = mysqli_query($con, $poll_options_query) or die(mysqli_error($con));
+                                                        $options = [];
+                                                        while ($option_row = mysqli_fetch_array($options_result)) {
+                                                            $options[] = $option_row['poll_option'];
+                                                        }
+                                                        $options_text = implode(', ', $options);
+
                                                 ?>
                                                 <tr>         
                                                     <td class=""><?php echo $counter; ?></td>
                                                     <td class=""><?php echo $poll_title; ?></td>
                                                     <td class=""><?php echo $poll_description; ?></td>
-                                                    <td class=""><?php ?></td>
+                                                    <td><?php echo htmlspecialchars($options_text); ?></td>
                                                     <td class=""><?php echo $status_text; ?></td>
                                                     <td class="text-center">
                                                         <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#edit_<?php echo $poll_id; ?>"><i class="fa-solid fa-pen-to-square"></i></a>
@@ -134,7 +144,7 @@
                                 </div>
                             </div>
                         </div>
-                        <?php // include('modal/user_add_modal.php'); ?>
+                        <?php include('modal/poll_add_modal.php'); ?>
                     </div>
                     
                 </div>
@@ -169,6 +179,32 @@
             $('#myTable').DataTable({
                 scrollX: true
             })
+        });
+    </script>
+
+    <!-- Add Poll Modal Script -->
+    <script>
+        $(document).ready(function() {
+            // Function to add new poll option input field with a remove button
+            $('#add-option-button').on('click', function() {
+                var newIndex = $('.poll-option-input').length;
+                var newOption = `
+                    <div class="col-12 form-group mb-3 px-0 poll-option-group">
+                        <div class="col-12 d-flex">
+                            <label class="control-label modal-label my-auto" for="poll_options_${newIndex}">Poll Option ${newIndex + 1} </label>
+                        </div>
+                        <div class="col-12 d-flex">
+                            <input class="form-control poll-option-input custom-readonly-input" id="poll_options_${newIndex}" name="poll_options[]" type="text" required>
+                            <button type="button" class="btn btn-danger ml-2 remove-option-button">Remove</button>
+                        </div>
+                    </div>`;
+                $('#poll-options-container').append(newOption);
+            });
+
+            // Function to remove poll option input field
+            $(document).on('click', '.remove-option-button', function() {
+                $(this).closest('.poll-option-group').remove();
+            });
         });
     </script>
 
@@ -234,74 +270,74 @@
         });
     </script>
 
-<!-- Open/Close Poll -->
-<script>
-    $(document).ready(function() {
-        // Function for opening/closing polls
-        $('.open-poll-btn, .close-poll-btn').on('click', function(e) {
-            e.preventDefault();
-            var actionButton = $(this);
-            var pollID = actionButton.data('poll-id');
-            var pollTitle = actionButton.data('poll-title');
-            var pollDescription = actionButton.data('poll-description');
-            var pollStatus = actionButton.data('poll-status');
-            var isOpenAction = actionButton.hasClass('open-poll-btn');
-            var actionText = isOpenAction ? 'open' : 'close';
-            var actionURL = isOpenAction ? 'action/open_poll.php' : 'action/close_poll.php';
-            var confirmText = isOpenAction ? 'Yes, start!' : 'Yes, close!';
+    <!-- Open/Close Poll -->
+    <script>
+        $(document).ready(function() {
+            // Function for opening/closing polls
+            $('.open-poll-btn, .close-poll-btn').on('click', function(e) {
+                e.preventDefault();
+                var actionButton = $(this);
+                var pollID = actionButton.data('poll-id');
+                var pollTitle = actionButton.data('poll-title');
+                var pollDescription = actionButton.data('poll-description');
+                var pollStatus = actionButton.data('poll-status');
+                var isOpenAction = actionButton.hasClass('open-poll-btn');
+                var actionText = isOpenAction ? 'open' : 'close';
+                var actionURL = isOpenAction ? 'action/open_poll.php' : 'action/close_poll.php';
+                var confirmText = isOpenAction ? 'Yes, start!' : 'Yes, close!';
 
-            Swal.fire({
-                title: isOpenAction ? 'Open Poll' : 'Close Poll',
-                html: "You are about to " + actionText + " the following poll:<br><br>" +
-                      "<strong>Title:</strong> " + pollTitle + "<br>" +
-                      "<strong>Description:</strong> " + pollDescription + "<br>" +
-                      "<strong>Status:</strong> " + pollStatus + "<br>",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: confirmText
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: actionURL,
-                        type: 'POST',
-                        data: {
-                            poll_id: pollID
-                        },
-                        success: function(response) {
-                            if (response.trim() === 'success') {
-                                Swal.fire(
-                                    'Success!',
-                                    'Poll has been ' + actionText + 'ed.',
-                                    'success'
-                                ).then(() => {
-                                    location.reload();
-                                });
-                            } else {
+                Swal.fire({
+                    title: isOpenAction ? 'Open Poll' : 'Close Poll',
+                    html: "You are about to " + actionText + " the following poll:<br><br>" +
+                          "<strong>Title:</strong> " + pollTitle + "<br>" +
+                          "<strong>Description:</strong> " + pollDescription + "<br>" +
+                          "<strong>Status:</strong> " + pollStatus + "<br>",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: confirmText
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: actionURL,
+                            type: 'POST',
+                            data: {
+                                poll_id: pollID
+                            },
+                            success: function(response) {
+                                if (response.trim() === 'success') {
+                                    Swal.fire(
+                                        'Success!',
+                                        'Poll has been ' + actionText + 'ed.',
+                                        'success'
+                                    ).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'Error!',
+                                        'Failed to ' + actionText + ' poll.',
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(xhr.responseText);
                                 Swal.fire(
                                     'Error!',
                                     'Failed to ' + actionText + ' poll.',
                                     'error'
                                 );
                             }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr.responseText);
-                            Swal.fire(
-                                'Error!',
-                                'Failed to ' + actionText + ' poll.',
-                                'error'
-                            );
-                        }
-                    });
-                }
+                        });
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
 
-    <!-- Add User Account-->
+    <!-- Add Poll Account-->
     <script>
         $(document).ready(function() {
             // Function to show SweetAlert2 warning message
@@ -313,41 +349,7 @@
                 });
             };
 
-            // Function to check if username or email already exists
-            const checkExistingUser = (formData) => {
-                return new Promise((resolve, reject) => {
-                    $.ajax({
-                        url: 'action/check_user_exists.php', // URL to check the database
-                        type: 'POST',
-                        data: formData.serialize(), // Serialize form data
-                        success: function(response) {
-                            if (response.exists) {
-                                // Highlight the corresponding input fields with red border
-                                if (response.exists.username && response.exists.email) {
-                                    showWarningMessage('Username and Email already exists.');
-                                    formData.find('input[name="username"]').addClass('input-error');
-                                    formData.find('input[name="email"]').addClass('input-error');
-                                } else if (response.exists.username) {
-                                    showWarningMessage('Username already exists.');
-                                    formData.find('input[name="username"]').addClass('input-error');
-                                } else if (response.exists.email) {
-                                    showWarningMessage('Email already exists.');
-                                    formData.find('input[name="email"]').addClass('input-error');
-                                }
-                                reject(); // Reject the promise if department already exists
-                            } else {
-                                resolve(); // Resolve the promise if department doesn't exist
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr.responseText); // Output error response to console (for debugging)
-                            reject(); // Reject the promise if there's an error
-                        }
-                    });
-                });
-            };
-
-            $('#addUser').on('click', function(e) {
+            $('#addPoll').on('click', function(e) {
                 e.preventDefault(); // Prevent default form submission
 
                 var formData = $('#addNew form'); // Select the form element
@@ -375,72 +377,56 @@
                     }
                 });
 
-                let passwordsAreValid = true; // Initialize as true
-                const password = formData.find('input[name="password"]').val();
-                const confirmPassword = formData.find('input[name="confirm_password"]').val();
-
                 if (fieldsAreValid) {
-                    if (password !== confirmPassword) {
-                        passwordsAreValid = false;
-                        showWarningMessage("Passwords don't match. Please check and try again.");
-                        formData.find('input[name="confirm_password"]').addClass('is-invalid'); // Add red border to confirm password field
-                    } else {
-                        formData.find('input[name="confirm_password"]').removeClass('is-invalid'); // Remove red border if passwords match
-                    }
-                }
 
-                if (fieldsAreValid && passwordsAreValid) {
-                    checkExistingUser(formData).then(() => {
-                        // If username or email doesn't exist, proceed with form submission
-                        $.ajax({
-                            url: 'action/add_user.php', // URL to submit the form data
-                            type: 'POST',
-                            data: formData.serialize(), // Serialize form data
-                            success: function(response) {
-                                // Handle the success response
-                                console.log(response); // Output response to console (for debugging)
-                                if (response === 'success') {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'User added successfully!',
-                                        showConfirmButton: true, // Show OK button
-                                        confirmButtonText: 'OK'
-                                    }).then(() => {
-                                        location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Failed to add user!',
-                                        text: 'Please try again later.',
-                                        showConfirmButton: true,
-                                        confirmButtonText: 'OK'
-                                    }).then(() => {
-                                        location.reload();
-                                    });
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                // Handle the error response
-                                console.error(xhr.responseText); // Output error response to console (for debugging)
+                    $.ajax({
+                        url: 'action/add_poll.php', // URL to submit the form data
+                        type: 'POST',
+                        data: formData.serialize(), // Serialize form data
+                        success: function(response) {
+                            // Handle the success response
+                            console.log(response); // Output response to console (for debugging)
+                            if (response === 'success') {
                                 Swal.fire({
-                                    icon: 'error',
-                                    title: 'Failed to add user',
-                                    text: 'Please try again later.',
+                                    icon: 'success',
+                                    title: 'Poll added successfully!',
                                     showConfirmButton: true, // Show OK button
                                     confirmButtonText: 'OK'
                                 }).then(() => {
                                     location.reload();
                                 });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Failed to add poll!',
+                                    text: 'Please try again later.',
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    location.reload();
+                                });
                             }
-                        });
-                     }).catch(() => {
-                        // If user exists, do nothing (error message already shown)
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle the error response
+                            console.error(xhr.responseText); // Output error response to console (for debugging)
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Failed to add poll',
+                                text: 'Please try again later.',
+                                showConfirmButton: true, // Show OK button
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        }
                     });
+
                 }
             });
         });
     </script>
+    
     <!-- Update User Account -->
     <script>
         $(document).ready(function() {
