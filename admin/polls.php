@@ -76,25 +76,29 @@
                                                         $poll_description = $row['poll_description'];
                                                         $poll_status = $row['poll_status'];
 
-                                                        if ($poll_status == "CLOSED") {
-                                                            $status_text = "<span class='text-danger'>CLOSED</span>";
+                                                        if ($poll_status == "CLOSE") {
+                                                            $status_text = "<span class='text-danger'>CLOSE</span>";
                                                         }elseif ($poll_status == "OPEN") {
                                                             $status_text = "<span class='text-success'>OPEN</span>";
                                                         }
 
-                                                        if ($poll_status == "CLOSED") {
-                                                            $status_button = "<a class='btn btn-sm btn-success start-poll-btn shadow-sm'
-                                                                                data-toggle='tooltip' data-placement='right' title='Open ".$poll_title."'
-                                                                                data-poll-id=".$poll_id."
-                                                                                data-poll-name=".htmlspecialchars($poll_title)."
-                                                                                data-poll-description=".htmlspecialchars($poll_description)."><i class='fa-solid fa-play'></i>
+                                                        if ($poll_status == "CLOSE") {
+                                                            $status_button = "<a class='btn btn-sm btn-success open-poll-btn shadow-sm'
+                                                                                data-toggle='tooltip' data-placement='right' title='Open " . htmlspecialchars($poll_title) . "'
+                                                                                data-poll-id='" . htmlspecialchars($poll_id) . "'
+                                                                                data-poll-title='" . htmlspecialchars($poll_title) . "'
+                                                                                data-poll-description='" . htmlspecialchars($poll_description) . "'
+                                                                                data-poll-status='" . htmlspecialchars($poll_status) . "'>
+                                                                                <i class='fa-solid fa-play'></i>
                                                                               </a>";
                                                         } elseif ($poll_status == "OPEN") {
-                                                            $status_button = "<a class='btn btn-sm btn-secondary stop-poll-btn shadow-sm'
-                                                                                data-toggle='tooltip' data-placement='right' title='Close ".$poll_title."'
-                                                                                data-poll-id=".$poll_id."
-                                                                                data-poll-name=".htmlspecialchars($poll_title)."
-                                                                                data-poll-description=".htmlspecialchars($poll_description)."><i class='fa-solid fa-stop'></i>
+                                                            $status_button = "<a class='btn btn-sm btn-secondary close-poll-btn shadow-sm'
+                                                                                data-toggle='tooltip' data-placement='right' title='Close " . htmlspecialchars($poll_title) . "'
+                                                                                data-poll-id='" . htmlspecialchars($poll_id) . "'
+                                                                                data-poll-title='" . htmlspecialchars($poll_title) . "'
+                                                                                data-poll-description='" . htmlspecialchars($poll_description) . "'
+                                                                                data-poll-status='" . htmlspecialchars($poll_status) . "'>
+                                                                                <i class='fa-solid fa-stop'></i>
                                                                               </a>";
                                                         }
 
@@ -168,7 +172,7 @@
         });
     </script>
 
-    <!-- Delete User Account -->
+    <!-- Delete Poll -->
     <script>
         $(document).ready(function() {
             // Function for deleting event
@@ -229,6 +233,74 @@
             });
         });
     </script>
+
+<!-- Open/Close Poll -->
+<script>
+    $(document).ready(function() {
+        // Function for opening/closing polls
+        $('.open-poll-btn, .close-poll-btn').on('click', function(e) {
+            e.preventDefault();
+            var actionButton = $(this);
+            var pollID = actionButton.data('poll-id');
+            var pollTitle = actionButton.data('poll-title');
+            var pollDescription = actionButton.data('poll-description');
+            var pollStatus = actionButton.data('poll-status');
+            var isOpenAction = actionButton.hasClass('open-poll-btn');
+            var actionText = isOpenAction ? 'open' : 'close';
+            var actionURL = isOpenAction ? 'action/open_poll.php' : 'action/close_poll.php';
+            var confirmText = isOpenAction ? 'Yes, start!' : 'Yes, close!';
+
+            Swal.fire({
+                title: isOpenAction ? 'Open Poll' : 'Close Poll',
+                html: "You are about to " + actionText + " the following poll:<br><br>" +
+                      "<strong>Title:</strong> " + pollTitle + "<br>" +
+                      "<strong>Description:</strong> " + pollDescription + "<br>" +
+                      "<strong>Status:</strong> " + pollStatus + "<br>",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: confirmText
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: actionURL,
+                        type: 'POST',
+                        data: {
+                            poll_id: pollID
+                        },
+                        success: function(response) {
+                            if (response.trim() === 'success') {
+                                Swal.fire(
+                                    'Success!',
+                                    'Poll has been ' + actionText + 'ed.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Failed to ' + actionText + ' poll.',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                            Swal.fire(
+                                'Error!',
+                                'Failed to ' + actionText + ' poll.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+
     <!-- Add User Account-->
     <script>
         $(document).ready(function() {
