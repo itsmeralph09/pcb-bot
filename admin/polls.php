@@ -116,8 +116,14 @@
                                                 <tr>         
                                                     <td class=""><?php echo $counter; ?></td>
                                                     <td class=""><?php echo $poll_title; ?></td>
-                                                    <td class=""><?php echo $poll_description; ?></td>
-                                                    <td><?php echo htmlspecialchars($options_text); ?></td>
+                                                    <td class=""><?php echo (strlen($poll_description) > 30) ? substr($poll_description, 0, 30) . '...' : $poll_description; ?></td>
+                                                    <td>
+                                                        <ul>
+                                                            <?php foreach ($options as $option): ?>
+                                                                <li><?php echo htmlspecialchars($option); ?></li>
+                                                            <?php endforeach; ?>
+                                                        </ul>
+                                                    </td>
                                                     <td class=""><?php echo $status_text; ?></td>
                                                     <td class="text-center">
                                                         <?php if ($poll_status == 'OPEN') { ?>
