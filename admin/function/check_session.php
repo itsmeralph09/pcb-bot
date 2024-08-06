@@ -11,7 +11,7 @@ function checkSession() {
     if ($_SESSION['role'] == "ADMIN") {
         // Redirect to admin dashboard
         // redirectTo("../admin/index.php");
-    } elseif ($_SESSION['role'] == "USERS") {
+    } elseif ($_SESSION['role'] == "USER") {
         // Redirect to user dashboard
         redirectTo("../user/index.php");
     } else {
@@ -22,7 +22,7 @@ function checkSession() {
 
 function redirectToLogin($errorMessage) {
     $_SESSION['error'] = $errorMessage;
-    header("Location: ../login.php");
+    header("Location: ../index.php");
     exit;
 }
 

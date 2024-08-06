@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
+    header('Location: ../index.php');
     exit;
 } else {
     unset($_SESSION['user_id']);
@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id'])) {
     setcookie('PHPSESSID', '', time() - 3600, '/');
 
     session_destroy();
-    header("Location: ../login.php");
+    header("Location: ../index.php");
     exit;
 }
 ?>

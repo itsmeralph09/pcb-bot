@@ -1,3 +1,8 @@
+<?php
+  require_once "function/check_session.php";
+  // Check if user_id and role sessions are already set
+  redirectToDashboard();
+?>
 <!doctype html>
 <html lang="en">
 
@@ -26,6 +31,7 @@
 
 </head>
 <body>
+  <?php displaySessionErrorMessage(); ?>
   <section class="vh-100">
     <div class="container py-5 h-100">
       <div class="row d-flex align-items-center justify-content-center h-100">
