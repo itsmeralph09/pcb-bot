@@ -120,7 +120,13 @@
                                                     <td><?php echo htmlspecialchars($options_text); ?></td>
                                                     <td class=""><?php echo $status_text; ?></td>
                                                     <td class="text-center">
-                                                        <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#edit_<?php echo $poll_id; ?>"><i class="fa-solid fa-pen-to-square"></i></a>
+                                                        <?php if ($poll_status == 'OPEN') { ?>
+                                                            <a class="btn btn-sm shadow-sm btn-primary disabled" data-toggle="modal" data-target="#edit_<?php echo $poll_id; ?>"><i class="fa-solid fa-pen-to-square"></i>
+                                                            </a>
+                                                        <?php }elseif ($poll_status == 'CLOSE') { ?>
+                                                            <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#edit_<?php echo $poll_id; ?>"><i class="fa-solid fa-pen-to-square"></i>
+                                                            </a>
+                                                        <?php } ?>
                                                         <?= $status_button ?>
                                                         <a href="#" class="btn btn-sm btn-danger delete-poll-btn"
                                                            data-user-id="<?php echo $poll_id; ?>" 
