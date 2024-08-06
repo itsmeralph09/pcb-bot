@@ -57,8 +57,7 @@
                                             
                                             <tbody>
                                                 <?php
-                                                    // $user_id = $_SESSION['user_id'];
-                                                    $user_id = 1;
+                                                    $user_id = $_SESSION['user_id'];
 
                                                     require '../db/dbconn.php';
                                                     $display_users = "SELECT * FROM `poll_tbl` WHERE poll_status = 'OPEN' AND deleted = 0";
@@ -90,9 +89,15 @@
                                                     <td class=""><?php echo $poll_description; ?></td>
                                                     <td class=""><?php echo $status_text; ?></td>
                                                     <td class="text-center">
-                                                        <a class="btn btn shadow-sm btn-success <?php echo $has_voted ? 'disabled' : ''; ?>" data-toggle="modal" data-target="#vote_<?php echo $poll_id; ?>">
-                                                            <i class="fa-solid fa-hand-pointer mr-1"></i>Vote
-                                                        </a>
+                                                        <?php if ($has_voted) { ?>
+                                                            <a class="btn btn shadow-sm btn-success disabled" data-toggle="modal" data-target="#vote_<?php echo $poll_id; ?>">
+                                                                <i class="fa-solid fa-hand-pointer mr-1"></i>Vote
+                                                            </a>
+                                                        <?php }else{ ?>
+                                                            <a class="btn btn shadow-sm btn-success " data-toggle="modal" data-target="#vote_<?php echo $poll_id; ?>">
+                                                                <i class="fa-solid fa-hand-pointer mr-1"></i>Vote
+                                                            </a>
+                                                        <?php } ?>
                                                     </td>
                                                 </tr>
                                                 <?php

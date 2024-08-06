@@ -40,8 +40,8 @@
                                         $optionIndex = 1; // To keep track of the option number
                                         while ($option = mysqli_fetch_array($result)) {
                                             echo '<div class="radio-option">
-                                                    <input type="radio" id="control_' . $optionIndex . '" name="poll_option" value="' . $option['poll_option_id'] . '" ' . ($firstOption ? 'checked' : '') . ' />
-                                                    <label for="control_' . $optionIndex . '" class="radio-label">
+                                                    <input type="radio" id="control_' . $poll_id . '_' . $optionIndex . '" name="poll_option" value="' . $option['poll_option_id'] . '" ' . ($firstOption ? 'checked' : '') . ' />
+                                                    <label for="control_' . $poll_id . '_' . $optionIndex . '" class="radio-label">
                                                         <h4 class="radio-title">(Option ' . $optionIndex . ')</h4>
                                                         <p class="radio-description">' . htmlspecialchars($option['poll_option']) . '</p>
                                                     </label>
