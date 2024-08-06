@@ -40,12 +40,12 @@
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 // Redirect to login page after clicking "OK"
-                                window.location.href = "../login.php";
+                                window.location.href = "../index.php";
                             }
                         });
                         // Redirect to login page after successful logout
                         setTimeout(function(){
-                        window.location.href = "../login.php";
+                        window.location.href = "../index.php";
                         }, 1500); // Redirect after 1.5 seconds
                     },
                     error: function(xhr, status, error){
