@@ -214,14 +214,14 @@
             // Function to add new poll option input field with a remove button
             $(document).on('click', '[id^=add-option-button_]', function() {
                 const poll_id = $(this).attr('id').split('_')[1];
-                const newIndex = $('#poll-options-container_' + poll_id + ' .poll-option-input').length;
+                const newIndex = $('#poll-options-container_' + poll_id + ' .poll-option-input_' + poll_id).length;
                 const newOption = `
                     <div class="col-12 form-group mb-3 px-0 poll-option-group">
                         <div class="col-12 d-flex">
                             <label class="control-label modal-label my-auto" for="poll_options_${poll_id}_${newIndex}">Poll Option ${newIndex + 1}</label>
                         </div>
                         <div class="col-12 d-flex">
-                            <input class="form-control poll-option-input custom-readonly-input" id="poll_options_${poll_id}_${newIndex}" name="poll_options[]" type="text" required>
+                            <input class="form-control poll-option-input_${poll_id} custom-readonly-input" id="poll_options_${poll_id}_${newIndex}" name="poll_options[]" type="text" required>
                             <button type="button" class="btn btn-danger ml-2" id="remove-option-button_${poll_id}">Remove</button>
                         </div>
                     </div>`;

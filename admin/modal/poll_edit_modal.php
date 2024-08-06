@@ -59,7 +59,7 @@
                                                 <label class="control-label modal-label my-auto" for="poll_options_'. $poll_id. '_' . $index . '">Poll Option ' . ($index + 1) . '</label>
                                             </div>
                                             <div class="col-12 d-flex">
-                                                <input class="form-control poll-option-input custom-readonly-input" id="poll_options_'. $poll_id. '_' . $index . '" name="poll_options[]" value="' . htmlspecialchars($option['poll_option']) . '" type="text" required>
+                                                <input class="form-control poll-option-input_'.$poll_id.' custom-readonly-input" id="poll_options_'. $poll_id. '_' . $index . '" name="poll_options[]" value="' . htmlspecialchars($option['poll_option']) . '" type="text" required>
                                                 <button type="button" class="btn btn-danger ml-2" id="remove-option-button_'.$poll_id.'">Remove</button>
                                             </div>
                                         </div>';
