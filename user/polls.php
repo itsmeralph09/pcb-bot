@@ -57,6 +57,7 @@
                                             
                                             <tbody>
                                                 <?php
+                                                    $user_id = 1;
 
                                                     require '../db/dbconn.php';
                                                     $display_users = "SELECT * FROM `poll_tbl` WHERE poll_status = 'OPEN' AND deleted = 0";
@@ -74,28 +75,7 @@
                                                             $status_text = "<span class='text-danger'>CLOSE</span>";
                                                         }elseif ($poll_status == "OPEN") {
                                                             $status_text = "<span class='text-success'>OPEN</span>";
-                                                        }
-
-
-                                                        if ($poll_status == "CLOSE") {
-                                                            $status_button = "<a class='btn btn-sm btn-success open-poll-btn shadow-sm'
-                                                                                data-toggle='tooltip' data-placement='right' title='Open " . htmlspecialchars($poll_title) . "'
-                                                                                data-poll-id='" . htmlspecialchars($poll_id) . "'
-                                                                                data-poll-title='" . htmlspecialchars($poll_title) . "'
-                                                                                data-poll-description='" . htmlspecialchars($poll_description) . "'
-                                                                                data-poll-status='" . htmlspecialchars($poll_status) . "'>
-                                                                                <i class='fa-solid fa-play'></i>
-                                                                              </a>";
-                                                        } elseif ($poll_status == "OPEN") {
-                                                            $status_button = "<a class='btn btn-sm btn-secondary close-poll-btn shadow-sm'
-                                                                                data-toggle='tooltip' data-placement='right' title='Close " . htmlspecialchars($poll_title) . "'
-                                                                                data-poll-id='" . htmlspecialchars($poll_id) . "'
-                                                                                data-poll-title='" . htmlspecialchars($poll_title) . "'
-                                                                                data-poll-description='" . htmlspecialchars($poll_description) . "'
-                                                                                data-poll-status='" . htmlspecialchars($poll_status) . "'>
-                                                                                <i class='fa-solid fa-stop'></i>
-                                                                              </a>";
-                                                        }
+                                                        } 
 
                                                 ?>
                                                 <tr>         
@@ -104,12 +84,12 @@
                                                     <td class=""><?php echo $poll_description; ?></td>
                                                     <td class=""><?php echo $status_text; ?></td>
                                                     <td class="text-center">
-                                                        <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#vote_<?php echo $poll_id; ?>"><i class="fa-solid fa-hand-pointer mr-1"></i>Vote</a>
+                                                        <a class="btn btn shadow-sm btn-success" data-toggle="modal" data-target="#vote_<?php echo $poll_id; ?>"><i class="fa-solid fa-hand-pointer mr-1"></i>Vote</a>
                                                     </td>
                                                 </tr>
                                                 <?php
                                                     $counter++;
-                                                    // include('modal/poll_vote_modal.php');
+                                                    include('modal/poll_vote_modal.php');
                                                 } 
                                                 ?>
                                             </tbody>
@@ -157,175 +137,50 @@
         });
     </script>
 
-    <!-- Add Poll Modal Script -->
-    <script>
-        $(document).ready(function() {
-            // Function to add new poll option input field with a remove button
-            $('#add-option-button').on('click', function() {
-                var newIndex = $('.poll-option-input').length;
-                var newOption = `
-                    <div class="col-12 form-group mb-3 px-0 poll-option-group">
-                        <div class="col-12 d-flex">
-                            <label class="control-label modal-label my-auto" for="poll_options_${newIndex}">Poll Option ${newIndex + 1} </label>
-                        </div>
-                        <div class="col-12 d-flex">
-                            <input class="form-control poll-option-input custom-readonly-input" id="poll_options_${newIndex}" name="poll_options[]" type="text" required>
-                            <button type="button" class="btn btn-danger ml-2 remove-option-button">Remove</button>
-                        </div>
-                    </div>`;
-                $('#poll-options-container').append(newOption);
+    <!-- Vote -->
+<script>
+    $(document).ready(function() {
+        // Function to show SweetAlert2 messages
+        const showSweetAlert = (icon, title, message) => {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: message
             });
+        };
 
-            // Function to remove poll option input field
-            $(document).on('click', '.remove-option-button', function() {
-                $(this).closest('.poll-option-group').remove();
-            });
-        });
-    </script>
+        // Delegate click event handling to a parent element
+        $(document).on('click', '[id^="submitVote_"]', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            var pollID = $(this).attr('id').split('_')[1]; // Extract poll ID
+            var form = $('#voteForm_' + pollID); // Get the form data
+            var modalDiv = $('#vote_' + pollID);
+            var selectedOption = modalDiv.find('input[name="poll_option"]:checked'); // Get the selected option
 
-    <!-- Edit Poll Modal Script -->
-    <script>
-        $(document).ready(function() {
-            // Function to add new poll option input field with a remove button
-            $(document).on('click', '[id^=add-option-button_]', function() {
-                const poll_id = $(this).attr('id').split('_')[1];
-                const newIndex = $('#poll-options-container_' + poll_id + ' .poll-option-input').length;
-                const newOption = `
-                    <div class="col-12 form-group mb-3 px-0 poll-option-group">
-                        <div class="col-12 d-flex">
-                            <label class="control-label modal-label my-auto" for="poll_options_${poll_id}_${newIndex}">Poll Option ${newIndex + 1}</label>
-                        </div>
-                        <div class="col-12 d-flex">
-                            <input class="form-control poll-option-input custom-readonly-input" id="poll_options_${poll_id}_${newIndex}" name="poll_options[]" type="text" required>
-                            <button type="button" class="btn btn-danger ml-2" id="remove-option-button_${poll_id}">Remove</button>
-                        </div>
-                    </div>`;
-                $('#poll-options-container_' + poll_id).append(newOption);
-            });
+            if (selectedOption.length === 0) {
+                showSweetAlert('warning', 'No Option Selected', 'Please select an option before voting.');
+            } else {
+                var selectedOptionText = selectedOption.next('label').text(); // Get the selected option text
 
-            // Function to remove poll option input field
-            $(document).on('click', '[id^=remove-option-button_]', function() {
-                // const poll_id = $(this).closest('.modal').find('[id^=poc_]').attr('id').split('_')[1];
-                const poll_id = $(this).attr('id').split('_')[1];
-                console.log(poll_id);
-                const remainingOptions = $('#poll-options-container_' + poll_id + ' .poll-option-group').length;
-
-                // Prevent removal if only two options are left
-                if (remainingOptions <= 2) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Cannot Remove Option',
-                        text: 'At least two poll options are required.'
-                    });
-                } else {
-                    $(this).closest('.poll-option-group').remove();
-                }
-            });
-        });
-    </script>
-
-    <!-- Delete Poll -->
-    <script>
-        $(document).ready(function() {
-            // Function for deleting event
-            $('.delete-poll-btn').on('click', function(e) {
-                e.preventDefault();
-                var deleteButton = $(this);
-                var pollID = deleteButton.data('user-id');
-                var pollTitle = decodeURIComponent(deleteButton.data('user-title'));
-                var pollDescription = decodeURIComponent(deleteButton.data('user-description'));
-                var pollStatus = decodeURIComponent(deleteButton.data('user-status'));
                 Swal.fire({
-                    title: 'Delete Poll',
-                    html: "You are about to delete the following poll:<br><br>" +
-                          "<strong>Title:</strong> " + pollTitle + "<br>" +
-                          "<strong>Description:</strong> " + pollDescription + "<br>" +
-                          "<strong>Status:</strong> " + pollStatus + "<br>",
-                    icon: 'warning',
+                    title: 'Confirm your vote',
+                    text: `You have selected: "${selectedOptionText}". Do you want to proceed?`,
+                    icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete!'
+                    confirmButtonText: 'Yes, vote!',
+                    cancelButtonText: 'No, cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: 'action/delete_poll.php',
+                            url: 'action/vote_poll.php', // URL to submit the form data
                             type: 'POST',
-                            data: {
-                                poll_id: pollID
-                            },
+                            data: form.serialize(), // Form data to be submitted
+                            dataType: 'json',
                             success: function(response) {
-                                if (response.trim() === 'success') {
-                                    Swal.fire(
-                                        'Deleted!',
-                                        'Poll has been deleted.',
-                                        'success'
-                                    ).then(() => {
-                                        location.reload();
-                                    });
-                                } else {
-                                    Swal.fire(
-                                        'Error!',
-                                        'Failed to delete poll.',
-                                        'error'
-                                    );
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error(xhr.responseText);
-                                Swal.fire(
-                                    'Error!',
-                                    'Failed to delete poll.',
-                                    'error'
-                                );
-                            }
-                        });
-                    }
-                });
-            });
-        });
-    </script>
-
-    <!-- Open/Close Poll -->
-    <script>
-        $(document).ready(function() {
-            // Function for opening/closing polls
-            $('.open-poll-btn, .close-poll-btn').on('click', function(e) {
-                e.preventDefault();
-                var actionButton = $(this);
-                var pollID = actionButton.data('poll-id');
-                var pollTitle = actionButton.data('poll-title');
-                var pollDescription = actionButton.data('poll-description');
-                var pollStatus = actionButton.data('poll-status');
-                var isOpenAction = actionButton.hasClass('open-poll-btn');
-                var actionText = isOpenAction ? 'open' : 'close';
-                var actionURL = isOpenAction ? 'action/open_poll.php' : 'action/close_poll.php';
-                var confirmText = isOpenAction ? 'Yes, start!' : 'Yes, close!';
-
-                Swal.fire({
-                    title: isOpenAction ? 'Open Poll' : 'Close Poll',
-                    html: "You are about to " + actionText + " the following poll:<br><br>" +
-                          "<strong>Title:</strong> " + pollTitle + "<br>" +
-                          "<strong>Description:</strong> " + pollDescription + "<br>" +
-                          "<strong>Status:</strong> " + pollStatus + "<br>",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: confirmText
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: actionURL,
-                            type: 'POST',
-                            data: {
-                                poll_id: pollID
-                            },
-                            success: function(response) {
-                                if (response.trim() === 'success') {
+                                if (response.status === 'success') {
                                     Swal.fire(
                                         'Success!',
-                                        'Poll has been ' + actionText + 'ed.',
+                                        response.message,
                                         'success'
                                     ).then(() => {
                                         location.reload();
@@ -333,195 +188,21 @@
                                 } else {
                                     Swal.fire(
                                         'Error!',
-                                        'Failed to ' + actionText + ' poll.',
+                                        response.message,
                                         'error'
                                     );
                                 }
                             },
                             error: function(xhr, status, error) {
-                                console.error(xhr.responseText);
-                                Swal.fire(
-                                    'Error!',
-                                    'Failed to ' + actionText + ' poll.',
-                                    'error'
-                                );
+                                showSweetAlert('error', 'Error', 'Failed to submit your vote. Please try again later.');
                             }
                         });
                     }
                 });
-            });
+            }
         });
-    </script>
-
-    <!-- Add Poll-->
-    <script>
-        $(document).ready(function() {
-            // Function to show SweetAlert2 warning message
-            const showWarningMessage = (message) => {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Oops...',
-                    text: message
-                });
-            };
-
-            $('#addPoll').on('click', function(e) {
-                e.preventDefault(); // Prevent default form submission
-
-                var formData = $('#addNew form'); // Select the form element
-
-                const requiredFields = formData.find('[required], select');
-                let fieldsAreValid = true; // Initialize as false
-
-                // Remove existing error classes
-                $('.form-control').removeClass('input-error');
-
-                requiredFields.each(function() {
-                    // Check if the element is a select and it doesn't have a selected value
-                    if ($(this).is('select') && $(this).val() === null) {
-                        fieldsAreValid = false; // Set to false if any required select field doesn't have a value
-                        showWarningMessage('Please fill-up the required fields.');
-                        $(this).addClass('is-invalid'); // Add red border to missing field
-                    }
-                    // Check if the element is empty
-                    else if ($(this).val().trim() === '') {
-                        fieldsAreValid = false; // Set to false if any required field is empty
-                        showWarningMessage('Please fill-up the required fields.');
-                        $(this).addClass('is-invalid'); // Add red border to missing field
-                    } else {
-                        $(this).removeClass('is-invalid'); // Remove red border if field is filled
-                    }
-                });
-
-                if (fieldsAreValid) {
-
-                    $.ajax({
-                        url: 'action/add_poll.php', // URL to submit the form data
-                        type: 'POST',
-                        data: formData.serialize(), // Serialize form data
-                        success: function(response) {
-                            // Handle the success response
-                            console.log(response); // Output response to console (for debugging)
-                            if (response === 'success') {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Poll added successfully!',
-                                    showConfirmButton: true, // Show OK button
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Failed to add poll!',
-                                    text: 'Please try again later.',
-                                    showConfirmButton: true,
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            // Handle the error response
-                            console.error(xhr.responseText); // Output error response to console (for debugging)
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Failed to add poll',
-                                text: 'Please try again later.',
-                                showConfirmButton: true, // Show OK button
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                location.reload();
-                            });
-                        }
-                    });
-
-                }
-            });
-        });
-    </script>
-
-    <!-- Update Poll -->
-    <script>
-        $(document).ready(function() {
-            // Function to show SweetAlert2 messages
-            const showSweetAlert = (icon, title, message) => {
-                Swal.fire({
-                    icon: icon,
-                    title: title,
-                    text: message
-                });
-            };
-
-            // Delegate click event handling to a parent element
-            $(document).on('click', '[id^="updatePoll_"]', function(e) {
-                e.preventDefault(); // Prevent default form submission
-                var pollID = $(this).attr('id').split('_')[1]; // Extract event ID
-                // var formData = $('#updateForm_' + pollID); // Get the form data
-                var formData = $('#updateForm_' + pollID).serialize(); // Get the form data
-                var modalDiv = $('#edit_' + pollID);
-
-                let fieldsAreValid = true; // Initialize as true
-                // const requiredFields = formData.find('[required]'); // Select required fields
-                const requiredFields = modalDiv.find(':input[required]'); // Select required fields
-
-                // Remove existing error classes
-                $('.form-control').removeClass('input-error');
-
-                requiredFields.each(function() {
-                    // Check if the element is a select and it doesn't have a selected value
-                    if ($(this).is('select') && $(this).val() === null) {
-                        fieldsAreValid = false; // Set to false if any required select field doesn't have a value
-                        showSweetAlert('warning', 'Oops!', 'Please fill-up the required fields.');
-                        $(this).addClass('is-invalid'); // Add red border to missing field
-                    }
-                    // Check if the element is empty
-                    else if ($(this).val().trim() === '') {
-                        fieldsAreValid = false; // Set to false if any required field is empty or null
-                        showSweetAlert('warning', 'Oops!', 'Please fill-up the required fields.');
-                        $(this).addClass('is-invalid'); // Add red border to missing field
-                    } else {
-                        $(this).removeClass('is-invalid'); // Remove red border if field is filled
-                    }
-                });
-                
-                if (fieldsAreValid) {
-                    $.ajax({
-                        url: 'action/update_poll.php', // URL to submit the form data
-                        type: 'POST',
-                        data: formData, // Form data to be submitted
-                        dataType: 'json',
-                        success: function(response) {
-                            // Handle the success response
-                            console.log(response); // Output response to console (for debugging)
-                            if (response.status === 'success') {
-                                Swal.fire(
-                                    'Success!',
-                                    response.message,
-                                    'success'
-                                ).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire(
-                                    'Error!',
-                                    response.message,
-                                    'error'
-                                );
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            // Handle the error response
-                            console.error(xhr.responseText); // Output error response to console (for debugging)
-                            showSweetAlert('error', 'Error', 'Failed to update poll. Please try again later.');
-                        }
-                    });   
-                }
-            });
-        });
-    </script>
+    });
+</script>
 
 </body>
 
