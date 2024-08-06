@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>PCB BOT</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS v5.2.1 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/login.css">
+   <link rel="icon" href="img/botlogo.png" type="png">
+</head>
+<body>
+
+
+  <section class="vh-100">
+    <div class="container py-5 h-100">
+      <div class="row d-flex align-items-center justify-content-center h-100">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+          <img src="img/botlogo.png" class="img-fluid" alt="BOT logo image" height="auto" width="auto">
+        </div>
+        <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+          <form action="login.php" method="post">
+           <p class="text-center h2 fw-bold mb-4 mx-1 mx-md-3 mt-3" style="color: #830408;">PCB | Board of Trustees</p>
+
+             <!-- Email input -->
+            <div class="form-floating mb-4">
+              <input type="text" class="form-control" name="username" autocomplete="off" id="floatingInput" placeholder="Enter your username" style="border-radius: 20px ;" >
+              <label for="floatingInput">Username</label>
+            </div>
+            
+             <!-- Password input -->
+           <div class="form-floating mb-4">
+              <input type="password" class="form-control" name="password" autocomplete="off" id="floatingPassword" placeholder="Enter your password" style="border-radius: 20px ;">
+              <label for="floatingPassword">Password</label>
+            </div>
+
+             <!-- Submit button -->
+            <!-- <button type="submit" class="btn btn-primary btn-lg">Login in</button> -->
+            <div class="d-flex justify-content-center mx-1 mb-3 mb-lg-1">
+              <input type="submit" value="Login" name="login" class="btn btn-danger btn-lg text-light my-2 py-3" style="width:100% ; border-radius: 30px; font-weight:600;" />
+            </div>
+
+           </form>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Bootstrap JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js" integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+  </script>
+</body>
+
+</html>
