@@ -124,8 +124,8 @@
                                             <div class="col-12 mb-2">
                                                 <h5 class="text-center text-info">Poll Result</h5>
                                             </div>
-                                            <div class="col-11">
-                                                <table class="table table-bordered nowrap dt-responsive" id="" width="100%" cellspacing="">
+                                            <div class="col-12">
+                                                <table class="table table-bordered table-striped nowrap " id="" width="100%" cellspacing="">
                                                     <thead class="">
                                                         <tr>
                                                             <th>Options</th>
