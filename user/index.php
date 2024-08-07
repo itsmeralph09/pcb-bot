@@ -49,9 +49,10 @@
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                                Hello, <span><?= $user_designation ?>, </span><span><?= $_SESSION['fullname'] ?></span></div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Welcome to PCB Board of Trustees Voting System</div>
+                                            <div class="text-xs font-weight-bold text-danger mb-1">
+                                                <h3>Hello, <span class="text-danger"><?= ucwords(strtolower($user_designation)) ?>, </span><span class="text-primary"><?= ucwords(strtolower($_SESSION['fullname'])) ?></span>,</h3>
+                                            </div>
+                                            <div class="h4 mb-0 font-weight-bold text-gray-800">Welcome to PCB Board of Trustees Voting System</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fa-solid fa-hands text-danger fa-2x"></i>
