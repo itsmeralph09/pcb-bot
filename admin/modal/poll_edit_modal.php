@@ -60,7 +60,7 @@
                                             </div>
                                             <div class="col-12 d-flex">
                                                 <input class="form-control poll-option-input_'.$poll_id.' custom-readonly-input" id="poll_options_'. $poll_id. '_' . $index . '" name="poll_options[]" value="' . htmlspecialchars($option['poll_option']) . '" type="text" required>
-                                                <button type="button" class="btn btn-danger ml-2" id="remove-option-button_'.$poll_id.'">Remove</button>
+                                                <button type="button" class="btn btn-danger ml-2" id="remove-option-button_'.$poll_id. '_'. $index. '">Remove</button>
                                             </div>
                                         </div>';
                                     $index++;
@@ -71,7 +71,7 @@
                 </div>
                 <div class="modal-footer col-12 px-4">
                     <button type="button" class="btn btn-outline-secondary col-12 col-sm-3" data-dismiss="modal">Cancel</button>
-                    <button type="submit" name="edit" class="btn btn-primary col-12 col-sm-3" id="updatePoll_<?= $poll_id ?>">Save</button>
+                    <button type="submit" name="edit" class="btn btn-primary col-12 col-sm-3" id="updatePoll_<?= $poll_id ?>">Update</button>
                 </div>
             </form>
         </div>

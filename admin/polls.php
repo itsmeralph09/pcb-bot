@@ -227,7 +227,7 @@
     </script>
 
     <!-- Edit Poll Modal Script -->
-    <script>
+    <!-- <script>
         $(document).ready(function() {
             // Function to add new poll option input field with a remove button
             $(document).on('click', '[id^=add-option-button_]', function() {
@@ -240,7 +240,7 @@
                         </div>
                         <div class="col-12 d-flex">
                             <input class="form-control poll-option-input_${poll_id} custom-readonly-input" id="poll_options_${poll_id}_${newIndex}" name="poll_options[]" type="text" required>
-                            <button type="button" class="btn btn-danger ml-2" id="remove-option-button_${poll_id}">Remove</button>
+                            <button type="button" class="btn btn-danger ml-2" id="remove-option-button_${poll_id}_${newIndex}">Remove</button>
                         </div>
                     </div>`;
                 $('#poll-options-container_' + poll_id).append(newOption);
@@ -266,7 +266,7 @@
             });
         });
     </script>
-
+ -->
     <!-- Delete Poll -->
     <script>
         $(document).ready(function() {
@@ -487,7 +487,7 @@
     </script>
 
     <!-- Update Poll -->
-    <script>
+    <!-- <script>
         $(document).ready(function() {
             // Function to show SweetAlert2 messages
             const showSweetAlert = (icon, title, message) => {
@@ -564,7 +564,170 @@
                 }
             });
         });
-    </script>
+    </script> -->
+<script>
+    $(document).ready(function() {
+        // Function to show SweetAlert2 messages
+        const showSweetAlert = (icon, title, message) => {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: message
+            });
+        };
+
+        // Function to refresh the form data
+        const refreshFormData = (pollID) => {
+            const form = $('#updateForm_' + pollID);
+            form.find('.form-control').each(function() {
+                $(this).val($(this).val()); // Force the form control to update its value
+            });
+        };
+
+        // Function to add new poll option input field with a remove button
+        $(document).on('click', '[id^=add-option-button_]', function() {
+            const poll_id = $(this).attr('id').split('_')[1];
+            const newIndex = $('#poll-options-container_' + poll_id + ' .poll-option-input_' + poll_id).length;
+            const newOption = `
+                <div class="col-12 form-group mb-3 px-0 poll-option-group">
+                    <div class="col-12 d-flex">
+                        <label class="control-label modal-label my-auto" for="poll_options_${poll_id}_${newIndex}">Poll Option ${newIndex + 1}<small class="text-info my-0"> (New Option)</small></label>
+                    </div>
+                    <div class="col-12 d-flex">
+                        <input class="form-control poll-option-input_${poll_id} custom-readonly-input" id="poll_options_${poll_id}_${newIndex}" name="poll_options[]" type="text" required>
+                        <button type="button" class="btn btn-danger btn-sm ml-2" id="remove-option-button_${poll_id}_${newIndex}"><i class="fa-solid fa-xmark"></i></button>
+                        <button type="button" class="btn btn-success btn-sm ml-2" id="save-option-button_${poll_id}_${newIndex}"><i class="fa-solid fa-check"></i></button>
+                    </div>
+                </div>`;
+            $('#poll-options-container_' + poll_id).append(newOption);
+            refreshFormData(poll_id); // Refresh form data after adding a new option
+        });
+
+        // Function to remove poll option input field
+        $(document).on('click', '[id^=remove-option-button_]', function() {
+            const poll_id = $(this).attr('id').split('_')[1];
+            const remainingOptions = $('#poll-options-container_' + poll_id + ' .poll-option-group').length;
+
+            // Prevent removal if only two options are left
+            if (remainingOptions <= 2) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Cannot Remove Option',
+                    text: 'At least two poll options are required.'
+                });
+            } else {
+                $(this).closest('.poll-option-group').remove();
+                refreshFormData(poll_id); // Refresh form data after removing an option
+            }
+        });
+
+        // Function to handle Save button click
+        $(document).on('click', '[id^=save-option-button_]', function() {
+            const buttonId = $(this).attr('id');
+            const poll_id = buttonId.split('_')[1];
+            const optionIndex = buttonId.split('_')[2];
+            const optionValue = $(`#poll_options_${poll_id}_${optionIndex}`).val();
+
+            if (optionValue.trim() === '') {
+                showSweetAlert('warning', 'Oops!', 'Please fill-up the required fields.');
+                $(`#poll_options_${poll_id}_${optionIndex}`).addClass('is-invalid'); // Add red border to missing field
+                return;
+            }
+
+            $.ajax({
+                url: 'action/save_new_option.php', // URL to handle saving new options
+                type: 'POST',
+                data: {
+                    poll_id: poll_id,
+                    poll_option: optionValue
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        Swal.fire(
+                            'Success!',
+                            response.message,
+                            'success'
+                        ).then(() => {
+                            location.reload(); // Refresh page or handle accordingly
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            response.message,
+                            'error'
+                        );
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire(
+                        'Error!',
+                        'Failed to save new option. Please try again later.',
+                        'error'
+                    );
+                }
+            });
+        });
+
+        // Handle form submission
+        $(document).on('click', '[id^="updatePoll_"]', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            var pollID = $(this).attr('id').split('_')[1]; // Extract poll ID
+            var form = $('#updateForm_' + pollID);
+            var formData = form.serialize(); // Serialize form data
+            var modalDiv = $('#edit_' + pollID);
+
+            let fieldsAreValid = true; // Initialize as true
+            const requiredFields = modalDiv.find(':input[required]'); // Select required fields
+
+            // Remove existing error classes
+            form.find('.form-control').removeClass('is-invalid');
+
+            requiredFields.each(function() {
+                // Check if the element is empty
+                if ($(this).val().trim() === '') {
+                    fieldsAreValid = false; // Set to false if any required field is empty
+                    showSweetAlert('warning', 'Oops!', 'Please fill-up the required fields.');
+                    $(this).addClass('is-invalid'); // Add red border to missing field
+                } else {
+                    $(this).removeClass('is-invalid'); // Remove red border if field is filled
+                }
+            });
+
+            if (fieldsAreValid) {
+                $.ajax({
+                    url: 'action/update_poll.php', // URL to submit the form data
+                    type: 'POST',
+                    data: formData, // Form data to be submitted
+                    dataType: 'json',
+                    success: function(response) {
+                        // Handle the success response
+                        if (response.status === 'success') {
+                            Swal.fire(
+                                'Success!',
+                                response.message,
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle the error response
+                        showSweetAlert('error', 'Error', 'Failed to update poll. Please try again later.');
+                    }
+                });
+            }
+        });
+    });
+</script>
+
 
 </body>
 
