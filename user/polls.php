@@ -90,8 +90,8 @@
                                                     <td class=""><?php echo $status_text; ?></td>
                                                     <td class="text-center">
                                                         <?php if ($has_voted) { ?>
-                                                            <a class="btn btn shadow-sm btn-success disabled" data-toggle="modal" data-target="#vote_<?php echo $poll_id; ?>">
-                                                                <i class="fa-solid fa-hand-pointer mr-1"></i>Vote
+                                                            <a class="btn btn shadow-sm btn-primary" data-toggle="modal" data-target="#view_vote_<?php echo $poll_id; ?>">
+                                                                <i class="fa-solid fa-eye mr-1"></i>View
                                                             </a>
                                                         <?php }else{ ?>
                                                             <a class="btn btn shadow-sm btn-success " data-toggle="modal" data-target="#vote_<?php echo $poll_id; ?>">
@@ -103,6 +103,7 @@
                                                 <?php
                                                     $counter++;
                                                     include('modal/poll_vote_modal.php');
+                                                    include('modal/poll_voteview_modal.php');
                                                 } 
                                                 ?>
                                             </tbody>
