@@ -120,20 +120,26 @@
                                                     <td>
                                                         <ul>
                                                             <?php foreach ($options as $option): ?>
-                                                                <li><?php echo htmlspecialchars($option); ?></li>
+                                                                <li><small><?php echo htmlspecialchars($option); ?></small></li>
                                                             <?php endforeach; ?>
                                                         </ul>
                                                     </td>
                                                     <td class=""><?php echo $status_text; ?></td>
                                                     <td class="text-center">
                                                         <?php if ($poll_status == 'OPEN') { ?>
-                                                            <a class="btn btn-sm shadow-sm btn-primary disabled" data-toggle="modal" data-target="#edit_<?php echo $poll_id; ?>"><i class="fa-solid fa-pen-to-square"></i>
+                                                            <a class="btn btn-sm shadow-sm btn-primary disabled" data-toggle="modal" data-target="#edit_<?php echo $poll_id; ?>">
+                                                                <i class="fa-solid fa-pen-to-square"></i>
                                                             </a>
                                                         <?php }elseif ($poll_status == 'CLOSE') { ?>
-                                                            <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#edit_<?php echo $poll_id; ?>"><i class="fa-solid fa-pen-to-square"></i>
+                                                            <a class="btn btn-sm shadow-sm btn-primary" data-toggle="modal" data-target="#edit_<?php echo $poll_id; ?>">
+                                                                <i class="fa-solid fa-pen-to-square"></i>
                                                             </a>
                                                         <?php } ?>
                                                         <?= $status_button ?>
+                                                        <a class="btn btn-sm shadow-sm btn-info" 
+                                                           href="poll_result.php?poll_id=<?= urlencode($poll_id) ?>&poll_title=<?= urlencode($poll_title) ?>&poll_description=<?= urlencode($poll_description) ?>">
+                                                           <i class="fa-solid fa-poll"></i>
+                                                        </a>
                                                         <a href="#" class="btn btn-sm btn-danger delete-poll-btn"
                                                            data-user-id="<?php echo $poll_id; ?>" 
                                                            data-user-title="<?php echo htmlspecialchars($poll_title); ?>"
