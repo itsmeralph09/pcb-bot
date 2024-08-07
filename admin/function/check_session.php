@@ -13,7 +13,7 @@ function checkSession() {
         // redirectTo("../admin/index.php");
     } elseif ($_SESSION['role'] == "USER") {
         // Redirect to user dashboard
-        redirectTo("../user/index.php");
+        redirectTo("../user/polls.php");
     } else {
         // Redirect to login page with an error message
         redirectToLogin("You must login first!");
