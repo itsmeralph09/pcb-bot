@@ -12,15 +12,15 @@
                 </a>
             </li>
             <!-- Divider -->
-            <!-- <hr class="sidebar-divider my-1"> -->
+            <hr class="sidebar-divider my-1">
 
             <!-- Nav Item - Dashboard -->
-<!--             <li class="nav-item">
-                <a class="nav-link disabled" href="index.php">
+            <li class="nav-item">
+                <a class="nav-link" href="index.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
-            </li> -->
+            </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider my-1">

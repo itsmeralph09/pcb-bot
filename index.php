@@ -118,7 +118,7 @@
                               if (role === "ADMIN") {
                                   window.location.href = './admin/index.php'; // Redirect to admin dashboard
                               } else if (role === "USER") {
-                                  window.location.href = './user/polls.php'; // Redirect to user page
+                                  window.location.href = './user/index.php'; // Redirect to user page
                               }
                           } else {
                               // If AJAX request is successful but response indicates error, show SweetAlert error message
